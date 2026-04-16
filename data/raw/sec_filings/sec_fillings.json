@@ -1,0 +1,33 @@
+[
+  {
+    "company": "Apple",
+    "year": "2023",
+    "section": "Risk Factors",
+    "content": ""
+  },
+  {
+    "company": "Amazon",
+    "year": "2025",
+    "section": "Risk Factors",
+    "content": "Full cleaned risk factors text..."
+  },
+  {
+    "company": "Google",
+    "year": "2023",
+    "section": "Risk Factors",
+    "content": "Full cleaned risk factors text..."
+  },
+  {
+    "company": "Microsoft",
+    "year": "2023",
+    "section": "Risk Factors",
+    "content": "Full cleaned risk factors text..."
+  },
+  {
+    "company": "Tesla",
+    "year": "2023",
+    "section": "Risk Factors",
+    "content": "Full cleaned risk factors text..."
+  }
+]
+
