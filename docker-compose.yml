@@ -1,0 +1,289 @@
+name: smartfinance
+
+x-common-service: &common-service
+  env_file:
+    - .env
+  restart: unless-stopped
+  networks:
+    - smartfinance
+
+x-python-service: &python-service
+  <<: *common-service
+  volumes:
+    - ./data:/app/data:ro
+
+services:
+  postgres:
+    <<: *common-service
+    image: postgres:16.3-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartfinance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-smartfinance_db}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartfinance} -d ${POSTGRES_DB:-smartfinance_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    <<: *common-service
+    image: redis:7.2.5-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mlflow:
+    <<: *common-service
+    image: ghcr.io/mlflow/mlflow:v2.11.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - mlflow_artifacts:/mlflow/artifacts
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=${MLFLOW_BACKEND_STORE_URI:-postgresql+psycopg2://smartfinance:change_me@postgres:5432/mlflow_db}
+      - --default-artifact-root=/mlflow/artifacts
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  airflow-webserver:
+    <<: *common-service
+    image: apache/airflow:2.9.0-python3.11
+    user: "${AIRFLOW_UID:-50000}:0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./module_08_mlops/dags:/opt/airflow/dags:ro
+      - ./data:/app/data
+      - ./artifacts/module_01:/app/artifacts/module_01
+      - airflow_logs:/opt/airflow/logs
+    command:
+      - bash
+      - -c
+      - >
+        airflow db migrate &&
+        (airflow users create
+        --username "$${AIRFLOW_ADMIN_USER:-admin}"
+        --password "$${AIRFLOW_ADMIN_PASSWORD:-admin}"
+        --firstname SmartFinance --lastname Admin
+        --role Admin
+        --email "$${AIRFLOW_ADMIN_EMAIL:-admin@example.com}" || true) &&
+        exec airflow webserver
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/health | grep -q healthy"]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+  airflow-scheduler:
+    <<: *common-service
+    image: apache/airflow:2.9.0-python3.11
+    user: "${AIRFLOW_UID:-50000}:0"
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    volumes:
+      - ./module_08_mlops/dags:/opt/airflow/dags:ro
+      - ./data:/app/data
+      - ./artifacts/module_01:/app/artifacts/module_01
+      - airflow_logs:/opt/airflow/logs
+    command: ["airflow", "scheduler"]
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\""]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  model_optimizer:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_01_model_optimization/Dockerfile
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    environment:
+      ARTIFACT_DIR: /app/artifacts/module_01
+    volumes:
+      - ./data:/app/data
+      - ./artifacts/module_01:/app/artifacts/module_01
+    profiles: ["training"]
+
+  deep_learning:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_02_deep_learning/Dockerfile
+    volumes:
+      - ./data:/app/data:ro
+      - ./artifacts/module_02:/app/module_02_deep_learning/artifacts/module_02
+    profiles: ["training"]
+
+  pretrained_models:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_03_pretrained_models/Dockerfile
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data:ro
+      - ./artifacts/module_03:/app/module_03_pretrained_models/artifacts/module_03
+    profiles: ["training"]
+
+  rag_api:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_04_rag_pipeline/Dockerfile
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8001:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  embeddings_service:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_05_embeddings/Dockerfile
+    ports:
+      - "127.0.0.1:8002:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  agent_orchestrator:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_06_multi_agent/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+      rag_api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8003:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  langgraph_crewai:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_07_langgraph_crewai/Dockerfile
+    depends_on:
+      rag_api:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data:ro
+      - ./artifacts/module_07:/app/module_07_langgraph_crewai/artifacts/module_07
+    profiles: ["training"]
+
+  monitoring:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_08_mlops/Dockerfile
+    depends_on:
+      mlflow:
+        condition: service_healthy
+      airflow-webserver:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8004:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  security_xai:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_09_security_ethics/Dockerfile
+    depends_on:
+      rag_api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8005:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  explainability:
+    <<: *python-service
+    build:
+      context: .
+      dockerfile: module_10_explainability/Dockerfile
+    volumes:
+      - ./data:/app/data:ro
+      - ./artifacts:/app/module_10_explainability/artifacts
+    profiles: ["training"]
+
+  jupyter:
+    <<: *common-service
+    image: quay.io/jupyter/scipy-notebook:2024-03-14
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks
+      - ./data:/home/jovyan/work/data
+    command: ["start-notebook.py", "--ServerApp.token=${JUPYTER_TOKEN:-smartfinance}"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8888/api || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+
+volumes:
+  postgres_data:
+  redis_data:
+  mlflow_artifacts:
+  airflow_logs:
+
+networks:
+  smartfinance:
+    driver: bridge

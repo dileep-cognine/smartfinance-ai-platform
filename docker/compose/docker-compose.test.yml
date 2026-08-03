@@ -1,0 +1,61 @@
+services:
+  model_optimizer:
+    build:
+      target: test
+    volumes:
+      - ./module_01_model_optimization/src:/app/module_01_model_optimization/src:ro
+      - ./module_01_model_optimization/tests:/app/module_01_model_optimization/tests:ro
+  deep_learning:
+    build:
+      target: test
+    volumes:
+      - ./module_02_deep_learning/src:/app/module_02_deep_learning/src:ro
+      - ./module_02_deep_learning/tests:/app/module_02_deep_learning/tests:ro
+  pretrained_models:
+    build:
+      target: test
+    volumes:
+      - ./module_03_pretrained_models/src:/app/module_03_pretrained_models/src:ro
+      - ./module_03_pretrained_models/tests:/app/module_03_pretrained_models/tests:ro
+  rag_api:
+    build:
+      target: test
+    volumes:
+      - ./module_04_rag_pipeline/src:/app/module_04_rag_pipeline/src:ro
+      - ./module_04_rag_pipeline/tests:/app/module_04_rag_pipeline/tests:ro
+  embeddings_service:
+    build:
+      target: test
+    volumes:
+      - ./module_05_embeddings/src:/app/module_05_embeddings/src:ro
+      - ./module_05_embeddings/tests:/app/module_05_embeddings/tests:ro
+  agent_orchestrator:
+    build:
+      target: test
+    volumes:
+      - ./module_06_multi_agent/src:/app/module_06_multi_agent/src:ro
+      - ./module_06_multi_agent/tests:/app/module_06_multi_agent/tests:ro
+  langgraph_crewai:
+    build:
+      target: test
+    volumes:
+      - ./module_07_langgraph_crewai/src:/app/module_07_langgraph_crewai/src:ro
+      - ./module_07_langgraph_crewai/tests:/app/module_07_langgraph_crewai/tests:ro
+  monitoring:
+    build:
+      target: test
+    volumes:
+      - ./module_08_mlops/src:/app/module_08_mlops/src:ro
+      - ./module_08_mlops/tests:/app/module_08_mlops/tests:ro
+  security_xai:
+    build:
+      target: test
+    volumes:
+      - ./module_09_security_ethics/src:/app/module_09_security_ethics/src:ro
+      - ./module_09_security_ethics/tests:/app/module_09_security_ethics/tests:ro
+  explainability:
+    build:
+      target: test
+    volumes:
+      - ./module_10_explainability/src:/app/module_10_explainability/src:ro
+      - ./module_10_explainability/tests:/app/module_10_explainability/tests:ro

@@ -1,0 +1,13 @@
+captum==0.7.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0+cpu
+joblib==1.4.2
+lime==0.2.0.1
+matplotlib==3.9.0
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+seaborn==0.13.2
+shap==0.45.1
+transformers==4.41.2
+xgboost==2.0.3

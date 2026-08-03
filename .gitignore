@@ -10,3 +10,12 @@ ENV/
 .env
 .env.*
 !.env.example
+
+# Generated files
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.ruff_cache/
+artifacts/
+mlruns/
+data/processed/splits/

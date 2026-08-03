@@ -1,0 +1,16 @@
+random_seed: 42
+target_column: target_default
+splits:
+  train: 0.70
+  validation: 0.15
+  test: 0.15
+cross_validation:
+  folds: 5
+  scoring: f2
+precision_constraint: 0.70
+grid:
+  n_estimators: [100, 250]
+  max_depth: [3, 6]
+  learning_rate: [0.03, 0.1]
+  subsample: [0.8, 1.0]
+  colsample_bytree: [0.8, 1.0]

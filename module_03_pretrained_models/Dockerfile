@@ -1,0 +1,24 @@
+FROM python:3.11.9-slim-bookworm AS builder
+WORKDIR /build
+COPY module_03_pretrained_models/requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+FROM python:3.11.9-slim-bookworm AS runtime
+WORKDIR /app/module_03_pretrained_models
+COPY --from=builder /install /usr/local
+COPY module_03_pretrained_models/ .
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/module_03_pretrained_models
+RUN adduser --disabled-password --gecos "" --uid 10001 appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD ["python", "-c", "import src.main; print('ok')"]
+CMD ["python", "-m", "src.main"]
+
+FROM runtime AS test
+USER root
+COPY module_03_pretrained_models/requirements-dev.txt /tmp/requirements-dev.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt
+USER appuser
+CMD ["pytest", "-v"]

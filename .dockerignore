@@ -1,0 +1,16 @@
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.ruff_cache/
+.git/
+.github/
+.env
+.venv/
+venv/
+notebooks/
+**/tests/
+data/raw/
+data/processed/transformed/
+artifacts/
+mlruns/
+*.ipynb
