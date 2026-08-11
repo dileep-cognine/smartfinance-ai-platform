@@ -1,6 +1,6 @@
 # Assessment Requirement Status
 
-Audit date: 2026-07-29
+Audit date: 2026-08-06
 
 ## Where Work Stopped
 
@@ -30,11 +30,11 @@ training partition only.
 |---|---|---|
 | Private GitHub repository and assessor access | Repository exists; access cannot be verified locally | Manual verification required |
 | Root Compose with all 11 long-running services | Empty | Implemented; production/test interpolation and service count pass |
-| Per-module multi-stage/non-root/health-check Dockerfile | Empty | Implemented for all 10 modules; current full build blocked by Docker BuildKit hang |
+| Per-module multi-stage/non-root/health-check Dockerfile | Empty | Implemented for all 10 modules; the custom Airflow image also builds and can import the Module 1 retraining runtime |
 | `.env.example`, no committed secrets | Empty template; `.env` ignored | Implemented template; inspect GitHub history manually |
 | Make targets build/up/down/test/logs/lint | Empty | Implemented; GNU Make is not installed on this Windows host |
 | Root installation README | Empty | Implemented |
-| Unit tests for utilities and API endpoints | Empty | Added for all modules; Module 6 container tests pass, other images pending |
+| Unit tests for utilities and API endpoints | Empty | Added for all modules; container tests passed for Modules 1-6, 8 and 9; Modules 7 and 10 remain to be run |
 | MLflow model versioning | Empty | Run logging, registration, stages, candidate/champion aliases and alias loading implemented |
 | Module `REPORT.md` findings and design decisions | Empty | Design/analysis written; measured result tables remain pending execution |
 | Meaningful task-by-task commits | Four historic commits only | Manual discipline required from this point |
@@ -56,7 +56,7 @@ training partition only.
 
 ## Remaining Execution Order
 
-1. Finish all Docker image builds and run `make test`/`make lint`.
+1. Start the platform from a clean Compose state and run `make test`/`make lint`, including Modules 7 and 10.
 2. Run Module 1 `prepare-data` then `run-all`; promote the measured champion.
 3. Run Modules 2 and 3 to create the deep/transformer model artifacts.
 4. Run Module 4 retrieval/RAG evaluations and Module 5 embedding experiments.

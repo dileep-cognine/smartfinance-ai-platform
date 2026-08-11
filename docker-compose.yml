@@ -70,7 +70,10 @@ services:
 
   airflow-webserver:
     <<: *common-service
-    image: apache/airflow:2.9.0-python3.11
+    build:
+      context: .
+      dockerfile: docker/services/airflow.Dockerfile
+    image: smartfinance-airflow:2.9.0
     user: "${AIRFLOW_UID:-50000}:0"
     depends_on:
       postgres:
@@ -82,6 +85,11 @@ services:
       - ./data:/app/data
       - ./artifacts/module_01:/app/artifacts/module_01
       - airflow_logs:/opt/airflow/logs
+    environment:
+      MODULE_01_DIR: /opt/smartfinance/module_01_model_optimization
+      MODULE_01_PYTHON: /opt/smartfinance/module_01_venv/bin/python
+      DATA_DIR: /app/data
+      ARTIFACT_DIR: /app/artifacts/module_01
     command:
       - bash
       - -c
@@ -103,7 +111,10 @@ services:
 
   airflow-scheduler:
     <<: *common-service
-    image: apache/airflow:2.9.0-python3.11
+    build:
+      context: .
+      dockerfile: docker/services/airflow.Dockerfile
+    image: smartfinance-airflow:2.9.0
     user: "${AIRFLOW_UID:-50000}:0"
     depends_on:
       airflow-webserver:
@@ -113,6 +124,11 @@ services:
       - ./data:/app/data
       - ./artifacts/module_01:/app/artifacts/module_01
       - airflow_logs:/opt/airflow/logs
+    environment:
+      MODULE_01_DIR: /opt/smartfinance/module_01_model_optimization
+      MODULE_01_PYTHON: /opt/smartfinance/module_01_venv/bin/python
+      DATA_DIR: /app/data
+      ARTIFACT_DIR: /app/artifacts/module_01
     command: ["airflow", "scheduler"]
     healthcheck:
       test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\""]

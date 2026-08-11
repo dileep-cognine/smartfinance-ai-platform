@@ -19,6 +19,7 @@ from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 LOGGER = logging.getLogger(__name__)
+MODULE_01_PYTHON = os.getenv("MODULE_01_PYTHON", "python")
 
 
 def sla_miss_callback(*args, **kwargs) -> None:
@@ -36,7 +37,7 @@ def validate_data(**context):
 def feature_engineering(**context):
     data_version = context["ti"].xcom_pull(task_ids="data_validation", key="data_version")
     subprocess.run(
-        ["python", "-m", "src.main", "prepare-data"],
+        [MODULE_01_PYTHON, "-m", "src.main", "prepare-data"],
         cwd=os.getenv(
             "MODULE_01_DIR", "/opt/smartfinance/module_01_model_optimization"
         ),
@@ -49,7 +50,7 @@ def feature_engineering(**context):
 def train_model(**context):
     completed = subprocess.run(
         [
-            "python",
+            MODULE_01_PYTHON,
             "-m",
             "src.main",
             "tune",
