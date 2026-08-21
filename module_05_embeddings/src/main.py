@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 from .vector_store.vector_db import DocumentIndex
 
 app = FastAPI(title="SmartFinance Embeddings API", version="0.1.0")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = Path(os.getenv("DATA_DIR", str(PROJECT_ROOT / "data")))
 _index: DocumentIndex | None = None
 
 
@@ -26,10 +28,7 @@ class SimilarDocsResponse(BaseModel):
 
 
 def _load_documents() -> list[tuple[str, str]]:
-    path = (
-        Path(os.getenv("DATA_DIR", "data"))
-        / "processed/cleaned/financial_phrasebank_clean.csv"
-    )
+    path = DEFAULT_DATA_DIR / "processed/cleaned/financial_phrasebank_clean.csv"
     if not path.exists():
         return [("system-0", "No document corpus has been mounted.")]
     with path.open(encoding="utf-8-sig", newline="") as handle:

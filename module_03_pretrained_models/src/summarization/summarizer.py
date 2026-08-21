@@ -35,6 +35,7 @@ def train_lora_summarizer(
     output_dir: Path,
     model_name: str = "facebook/bart-large-cnn",
     epochs: int = 3,
+    mlflow_enabled: bool = True,
 ) -> dict:
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     base_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
@@ -68,7 +69,7 @@ def train_lora_summarizer(
         evaluation_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        report_to=["mlflow"],
+        report_to=["mlflow"] if mlflow_enabled else [],
         seed=42,
     )
     trainer = Seq2SeqTrainer(

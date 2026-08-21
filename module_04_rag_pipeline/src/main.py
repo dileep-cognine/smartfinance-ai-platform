@@ -16,6 +16,8 @@ from .generator.llm import generate_with_langchain
 from .retriever.store import LocalVectorStore
 
 app = FastAPI(title="SmartFinance RAG API", version="0.1.0")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = Path(os.getenv("DATA_DIR", str(PROJECT_ROOT / "data")))
 _memory: dict[str, deque[tuple[str, str]]] = defaultdict(
     lambda: deque(maxlen=int(os.getenv("RAG_MEMORY_TURNS", "5")))
 )
@@ -46,8 +48,7 @@ def _load_store() -> LocalVectorStore:
     global _store
     if _store is not None:
         return _store
-    data_dir = Path(os.getenv("DATA_DIR", "data"))
-    filing_dir = data_dir / "processed/cleaned/sec_filings"
+    filing_dir = DEFAULT_DATA_DIR / "processed/cleaned/sec_filings"
     chunks: list[Chunk] = []
     for path in sorted(filing_dir.glob("*_cleaned.txt")):
         chunks.extend(fixed_chunks(path.read_text(encoding="utf-8", errors="ignore"), path.name))

@@ -20,6 +20,12 @@ from .evaluation.evaluate import (
 from .model_training.models import AttentionBiLSTM, BiLSTMClassifier, TextCNN
 from .model_training.train import train_model
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = Path(os.getenv("DATA_DIR", str(PROJECT_ROOT / "data")))
+DEFAULT_ARTIFACT_DIR = Path(
+    os.getenv("ARTIFACT_DIR", str(PROJECT_ROOT / "artifacts/module_02"))
+)
+
 EXAMPLES = [
     "The company reported strong revenue growth and higher profit.",
     "Shares fell after management warned about weaker demand.",
@@ -34,11 +40,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--data",
         type=Path,
-        default=Path(os.getenv("DATA_DIR", "data"))
-        / "processed/cleaned/financial_phrasebank_clean.csv",
+        default=DEFAULT_DATA_DIR / "processed/cleaned/financial_phrasebank_clean.csv",
     )
     parser.add_argument("--glove", type=Path)
-    parser.add_argument("--output", type=Path, default=Path("artifacts/module_02"))
+    parser.add_argument("--output", type=Path, default=DEFAULT_ARTIFACT_DIR)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=64)
     return parser

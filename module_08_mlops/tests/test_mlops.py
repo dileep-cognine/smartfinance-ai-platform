@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.main import app
-from src.monitoring import population_stability_index
 from src.model_registry.registry import promote_if_improved
+from src.monitoring import population_stability_index
 
 
 def test_psi_is_small_for_identical_samples() -> None:

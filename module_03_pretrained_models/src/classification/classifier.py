@@ -69,6 +69,7 @@ def train_classifier(
     model_name: str = "ProsusAI/finbert",
     use_lora: bool = False,
     epochs: int = 5,
+    mlflow_enabled: bool = True,
 ) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -112,7 +113,7 @@ def train_classifier(
         metric_for_best_model="f1_macro",
         greater_is_better=True,
         save_total_limit=2,
-        report_to=["mlflow"],
+        report_to=["mlflow"] if mlflow_enabled else [],
         seed=42,
     )
     trainer = Trainer(

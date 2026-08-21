@@ -159,7 +159,7 @@ services:
       dockerfile: module_02_deep_learning/Dockerfile
     volumes:
       - ./data:/app/data:ro
-      - ./artifacts/module_02:/app/module_02_deep_learning/artifacts/module_02
+      - ./artifacts/module_02:/app/artifacts/module_02
     profiles: ["training"]
 
   pretrained_models:
@@ -172,7 +172,7 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data:ro
-      - ./artifacts/module_03:/app/module_03_pretrained_models/artifacts/module_03
+      - ./artifacts/module_03:/app/artifacts/module_03
     profiles: ["training"]
 
   rag_api:
@@ -232,7 +232,7 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data:ro
-      - ./artifacts/module_07:/app/module_07_langgraph_crewai/artifacts/module_07
+      - ./artifacts/module_07:/app/artifacts/module_07
     profiles: ["training"]
 
   monitoring:
@@ -276,7 +276,7 @@ services:
       dockerfile: module_10_explainability/Dockerfile
     volumes:
       - ./data:/app/data:ro
-      - ./artifacts:/app/module_10_explainability/artifacts
+      - ./artifacts:/app/artifacts
     profiles: ["training"]
 
   jupyter:

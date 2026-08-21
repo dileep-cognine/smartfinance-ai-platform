@@ -12,6 +12,12 @@ import pandas as pd
 from .data import load_split, prepare_and_save
 from .tuning import tune
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = Path(os.getenv("DATA_DIR", str(PROJECT_ROOT / "data")))
+DEFAULT_ARTIFACT_DIR = Path(
+    os.getenv("ARTIFACT_DIR", str(PROJECT_ROOT / "artifacts/module_01"))
+)
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="SmartFinance credit-risk optimization")
@@ -21,12 +27,12 @@ def build_parser() -> argparse.ArgumentParser:
     prepare.add_argument(
         "--input",
         type=Path,
-        default=Path(os.getenv("DATA_DIR", "data")) / "raw/market_data/Give_some_credit.csv",
+        default=DEFAULT_DATA_DIR / "raw/market_data/Give_some_credit.csv",
     )
     prepare.add_argument(
         "--output-dir",
         type=Path,
-        default=Path(os.getenv("DATA_DIR", "data")) / "processed/splits",
+        default=DEFAULT_DATA_DIR / "processed/splits",
     )
 
     tuning = subparsers.add_parser("tune", help="Run one optimization strategy")
@@ -39,24 +45,24 @@ def build_parser() -> argparse.ArgumentParser:
     tuning.add_argument(
         "--split-dir",
         type=Path,
-        default=Path(os.getenv("DATA_DIR", "data")) / "processed/splits",
+        default=DEFAULT_DATA_DIR / "processed/splits",
     )
     tuning.add_argument(
         "--output-dir",
         type=Path,
-        default=Path(os.getenv("ARTIFACT_DIR", "artifacts/module_01")),
+        default=DEFAULT_ARTIFACT_DIR,
     )
     tuning.add_argument("--no-mlflow", action="store_true")
     run_all = subparsers.add_parser("run-all", help="Run the complete required comparison")
     run_all.add_argument(
         "--split-dir",
         type=Path,
-        default=Path(os.getenv("DATA_DIR", "data")) / "processed/splits",
+        default=DEFAULT_DATA_DIR / "processed/splits",
     )
     run_all.add_argument(
         "--output-dir",
         type=Path,
-        default=Path(os.getenv("ARTIFACT_DIR", "artifacts/module_01")),
+        default=DEFAULT_ARTIFACT_DIR,
     )
     run_all.add_argument("--no-mlflow", action="store_true")
     return parser

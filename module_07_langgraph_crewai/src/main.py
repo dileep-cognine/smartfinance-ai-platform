@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 from .crewai.crew_setup import build_crew
 from .langgraph.graph_builder import build_graph, run_or_resume, save_mermaid
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_ARTIFACT_DIR = Path(
+    os.getenv("ARTIFACT_DIR", str(PROJECT_ROOT / "artifacts/module_07"))
+)
 
 
 def main() -> None:
@@ -14,7 +20,7 @@ def main() -> None:
     parser.add_argument("--engine", choices=["langgraph", "crewai"], required=True)
     parser.add_argument("--ticker", required=True)
     parser.add_argument("--thread-id", default="research-session")
-    parser.add_argument("--output", type=Path, default=Path("artifacts/module_07"))
+    parser.add_argument("--output", type=Path, default=DEFAULT_ARTIFACT_DIR)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.engine == "langgraph":
