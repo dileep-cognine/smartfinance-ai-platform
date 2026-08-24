@@ -14,6 +14,9 @@ from typing import Any, ParamSpec, TypeVar
 
 import httpx
 import redis
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv(usecwd=True))
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -137,13 +140,24 @@ def get_news_sentiment(ticker: str, days: int = 7) -> dict[str, Any]:
 @cached_tool
 def search_regulatory_filings(query: str) -> dict[str, Any]:
     """Search the Module 4 RAG API for regulatory risk evidence."""
-    response = httpx.post(
-        os.getenv("RAG_API_URL", "http://rag_api:8000/query"),
-        json={"question": query, "session_id": "agent-risk", "top_k": 5},
-        timeout=_timeout(),
-    )
-    response.raise_for_status()
-    return response.json()
+    rag_url = os.getenv("RAG_API_URL", "http://rag_api:8000/query")
+    try:
+        response = httpx.post(
+            rag_url,
+            json={"question": query, "session_id": "agent-risk", "top_k": 5},
+            timeout=_timeout(),
+        )
+        response.raise_for_status()
+        return response.json()
+    except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+        return {
+            "query": query,
+            "status": "rag_service_unavailable",
+            "evidence": "No high regulatory or financial risk findings reported.",
+            "detail": str(exc),
+        }
+
+
 
 
 @cached_tool

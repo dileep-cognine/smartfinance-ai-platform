@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import re
 
+from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from .communication.messaging import ResearchState
 from .orchestration.orchestrator import Orchestrator
+
+load_dotenv(find_dotenv(usecwd=True))
 
 app = FastAPI(title="SmartFinance Agent Orchestrator", version="0.1.0")
 orchestrator = Orchestrator()
