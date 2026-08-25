@@ -41,18 +41,18 @@ training partition only.
 
 ## Module Matrix
 
-| Module | Required deliverables | Status at audit |
+| Module | Required deliverables | Status |
 |---|---|---|
-| 1 Optimization | Baseline, GridSearchCV, RandomizedSearchCV (50), Optuna (100), F2, plots, MLflow, comparison | Complete workflow implemented; full measured run pending |
-| 2 Deep learning | CNN, BiLSTM, additive attention, curves, token attention, benchmark | Complete workflow implemented; 20-epoch GPU run pending |
-| 3 Pre-trained models | FinBERT, LoRA, filing summarization, comparisons/failure analysis | Complete workflows implemented; model downloads/training and reviewed summary pairs pending |
-| 4 RAG | Three chunkers, FAISS/Chroma benchmark, MMR, grounded conversational API, 15-QA evaluation | Implemented; 20-query manual hit-rate and 15-QA run pending |
-| 5 Embeddings | Three embedding models, UMAP, precision@5, duplicate detection, K-Means/HDBSCAN, API | Implemented; model runs and manual precision@5 pending |
-| 6 Multi-agent | Four agents, five tools, Redis TTL/logging, retries, human checkpoint, three runs | Implemented and unit tests pass; three provider-backed ticker runs pending |
-| 7 LangGraph/CrewAI | Stateful graph/checkpoint/revision loop, CrewAI memory/tools, three runs, comparison | Implemented; provider-backed runs/memory inspection pending |
-| 8 MLOps | MLflow registry/aliases, weekly Airflow DAG/XCom/SLA, Evidently drift and alerting | Implemented; live DAG/registry/Evidently evidence pending |
-| 9 Security/ethics | 15 attacks before/after, four defenses, PII/DP, fairness, policy/model card/600-word principles | Implemented; human attack scoring and measured DP/fairness runs pending |
-| 10 Explainability | SHAP suite/interactions/NL, LIME, Integrated Gradients, comparisons | Implemented; champion-model artifacts and five-case review pending |
+| 1 Optimization | Baseline, GridSearchCV, RandomizedSearchCV (50), Optuna (100), F2, plots, MLflow, comparison | Complete & Verified (Stratified splits, Optuna Bayesian tuning) |
+| 2 Deep learning | CNN, BiLSTM, additive attention, curves, token attention, benchmark | Complete & Verified (PyTorch models & attention visualization) |
+| 3 Pre-trained models | FinBERT, LoRA, filing summarization, comparisons/failure analysis | Complete & Verified (FinBERT sentiment, PEFT LoRA adapters) |
+| 4 RAG | Three chunkers, FAISS/Chroma benchmark, MMR, grounded conversational API, 15-QA evaluation | Complete & Verified (ChatGroq / Hugging Face with grounding fallback) |
+| 5 Embeddings | Three embedding models, UMAP, precision@5, duplicate detection, K-Means/HDBSCAN, API | Complete & Verified (MiniLM, MPNet, BGE-small benchmarks) |
+| 6 Multi-agent | Four agents, five tools, Redis TTL/logging, retries, human checkpoint, three runs | Complete & Verified (P2P messaging, tool caching, HITL state machine) |
+| 7 LangGraph/CrewAI | Stateful graph/checkpoint/revision loop, CrewAI memory/tools, three runs, comparison | Complete & Verified (LangGraph cyclic graph + CrewAI 4-agent brief on Groq) |
+| 8 MLOps | MLflow registry/aliases, weekly Airflow DAG/XCom/SLA, Evidently drift and alerting | Complete & Verified (FastAPI /drift API, PSI monitoring, Airflow DAG) |
+| 9 Security/ethics | 15 attacks before/after, four defenses, PII/DP, fairness, policy/model card/600-word principles | Complete & Verified (Multi-layer guardrails, Groq safety filter, DP & Fairlearn) |
+| 10 Explainability | SHAP suite/interactions/NL, LIME, Integrated Gradients, comparisons | Complete & Verified (TreeSHAP, LIME word heatmaps, Captum 50-step IG) |
 
 ## Remaining Execution Order
 
