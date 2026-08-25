@@ -10,10 +10,11 @@ from .crewai.crew_setup import build_crew
 from .langgraph.graph_builder import build_graph, run_or_resume, save_mermaid
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_ARTIFACT_DIR = Path(
-    os.getenv("ARTIFACT_DIR", str(PROJECT_ROOT / "artifacts/module_07"))
-)
-
+env_artifact = os.getenv("ARTIFACT_DIR")
+if env_artifact and not env_artifact.startswith("/app"):
+    DEFAULT_ARTIFACT_DIR = Path(env_artifact) / "module_07"
+else:
+    DEFAULT_ARTIFACT_DIR = PROJECT_ROOT / "artifacts" / "module_07"
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -34,7 +35,6 @@ def main() -> None:
     else:
         result = build_crew(args.ticker).kickoff(inputs={"ticker": args.ticker})
         (args.output / f"{args.ticker}_crewai.md").write_text(str(result), encoding="utf-8")
-
 
 if __name__ == "__main__":
     main()

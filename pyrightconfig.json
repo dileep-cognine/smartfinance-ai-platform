@@ -1,24 +1,5 @@
-[build-system]
-requires = ["setuptools>=69"]
-build-backend = "setuptools.build_meta"
-
-[tool.pytest.ini_options]
-addopts = "-ra --basetemp=.pytest_tmp"
-testpaths = ["tests"]
-pythonpath = ["."]
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["src"]
-
-[tool.pyright]
-include = [
+{
+  "include": [
     "common",
     "tests",
     "module_01_model_optimization",
@@ -30,9 +11,9 @@ include = [
     "module_07_langgraph_crewai",
     "module_08_mlops",
     "module_09_security_ethics",
-    "module_10_explainability",
-]
-extraPaths = [
+    "module_10_explainability"
+  ],
+  "extraPaths": [
     ".",
     "common",
     "module_01_model_optimization",
@@ -44,5 +25,6 @@ extraPaths = [
     "module_07_langgraph_crewai",
     "module_08_mlops",
     "module_09_security_ethics",
-    "module_10_explainability",
-]
+    "module_10_explainability"
+  ]
+}

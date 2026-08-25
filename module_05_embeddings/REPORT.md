@@ -1,8 +1,7 @@
 # Module 5 Report - Embeddings
 
 `python -m src.experiments` samples one deterministic 200-document corpus and
-compares MiniLM, MPNet, and OpenAI `text-embedding-3-small`. When no OpenAI key
-is present it explicitly records BGE-small as the local substitute. It writes
+compares MiniLM, MPNet, and BGE-small (`BAAI/bge-small-en-v1.5`) via Hugging Face. It writes
 all vectors, three UMAP plots, latency, dimension, projected float32 storage for
 50,000 documents, ten-query precision@5 using category labels as a reproducible
 proxy, duplicate pairs at cosine 0.92, K-Means k=8 and HDBSCAN metrics, and

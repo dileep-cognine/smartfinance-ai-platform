@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 from captum.attr import LayerIntegratedGradients
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from module_02_deep_learning.src.data_processing.preprocess import tokenize
 from module_02_deep_learning.src.model_training.models import AttentionBiLSTM
@@ -38,7 +43,12 @@ def explain_sentence(
         target=target,
         n_steps=50,
     )
-    scores = attributions.sum(dim=-1).squeeze(0)
+    if isinstance(attributions, (tuple, list)):
+        attr_tensor = attributions[0]
+    else:
+        attr_tensor = attributions
+    assert isinstance(attr_tensor, torch.Tensor)
+    scores = attr_tensor.sum(dim=-1).squeeze(0)
     scores = scores / (torch.linalg.vector_norm(scores) + 1e-9)
     return scores[: len(words)].detach().cpu().tolist()
 

@@ -1,0 +1,17 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/common",
+    "${workspaceFolder}/module_01_model_optimization",
+    "${workspaceFolder}/module_02_deep_learning",
+    "${workspaceFolder}/module_03_pretrained_models",
+    "${workspaceFolder}/module_04_rag_pipeline",
+    "${workspaceFolder}/module_05_embeddings",
+    "${workspaceFolder}/module_06_multi_agent",
+    "${workspaceFolder}/module_07_langgraph_crewai",
+    "${workspaceFolder}/module_08_mlops",
+    "${workspaceFolder}/module_09_security_ethics",
+    "${workspaceFolder}/module_10_explainability"
+  ],
+  "python.analysis.autoSearchPaths": true
+}

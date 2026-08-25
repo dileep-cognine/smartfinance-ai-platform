@@ -1,4 +1,4 @@
-"""Embedding comparison, search evaluation, duplicates, and clustering."""
+"""Embedding comparison, search evaluation, duplicates, and clustering using Hugging Face models."""
 
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import umap
-from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -26,7 +26,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 LOCAL_MODELS = {
     "minilm": "sentence-transformers/all-MiniLM-L6-v2",
     "mpnet": "sentence-transformers/all-mpnet-base-v2",
-    "local_fallback": "BAAI/bge-small-en-v1.5",
+    "bge_small": "BAAI/bge-small-en-v1.5",
 }
 
 
@@ -47,34 +47,20 @@ def load_corpus(path: Path, limit: int = 200) -> pd.DataFrame:
 
 
 def embed_local(name: str, texts: list[str]) -> EmbeddingRun:
-    model = SentenceTransformer(LOCAL_MODELS[name])
+    token = os.getenv("HUGGINGFACE_TOKEN") or os.getenv("HF_TOKEN")
+    model = SentenceTransformer(LOCAL_MODELS[name], token=token) if token else SentenceTransformer(LOCAL_MODELS[name])
     started = time.perf_counter()
     vectors = model.encode(
         texts, normalize_embeddings=True, show_progress_bar=True, convert_to_numpy=True
     )
-    return EmbeddingRun(name, vectors, (time.perf_counter() - started) * 1000 / len(texts))
-
-
-def embed_openai_or_fallback(texts: list[str]) -> EmbeddingRun:
-    if not os.getenv("OPENAI_API_KEY"):
-        return embed_local("local_fallback", texts)
-    client = OpenAI()
-    started = time.perf_counter()
-    response = client.embeddings.create(model="text-embedding-3-small", input=texts)
-    vectors = np.asarray([item.embedding for item in response.data], dtype=np.float32)
-    vectors /= np.linalg.norm(vectors, axis=1, keepdims=True)
-    return EmbeddingRun(
-        "openai_text_embedding_3_small",
-        vectors,
-        (time.perf_counter() - started) * 1000 / len(texts),
-    )
+    return EmbeddingRun(name, np.asarray(vectors), (time.perf_counter() - started) * 1000 / len(texts))
 
 
 def save_umap(run: EmbeddingRun, labels: list[str], path: Path) -> None:
     coordinates = umap.UMAP(n_components=2, random_state=42).fit_transform(run.vectors)
     frame = pd.DataFrame({"x": coordinates[:, 0], "y": coordinates[:, 1], "label": labels})
     for label, group in frame.groupby("label"):
-        plt.scatter(group["x"], group["y"], label=label, alpha=0.75)
+        plt.scatter(group["x"].values, group["y"].values, label=str(label), alpha=0.75)
     plt.legend()
     plt.title(f"UMAP: {run.name}")
     plt.tight_layout()
@@ -105,10 +91,10 @@ def duplicate_pairs(vectors: np.ndarray, threshold: float = 0.92) -> list[tuple[
     ]
 
 
-def cluster_metrics(vectors: np.ndarray) -> tuple[dict, np.ndarray]:
+def cluster_metrics(vectors: np.ndarray) -> tuple[dict[str, Any], np.ndarray]:
     kmeans_labels = KMeans(n_clusters=8, random_state=42, n_init=20).fit_predict(vectors)
     hdbscan_labels = hdbscan.HDBSCAN(min_cluster_size=10, metric="euclidean").fit_predict(vectors)
-    results = {
+    results: dict[str, Any] = {
         "kmeans": {
             "silhouette": float(silhouette_score(vectors, kmeans_labels)),
             "davies_bouldin": float(davies_bouldin_score(vectors, kmeans_labels)),
@@ -134,9 +120,10 @@ def cluster_keywords(texts: list[str], labels: np.ndarray, terms: int = 6) -> di
     vectorizer = TfidfVectorizer(stop_words="english", max_features=5000)
     matrix = vectorizer.fit_transform(texts)
     names = np.asarray(vectorizer.get_feature_names_out())
-    output = {}
+    output: dict[str, list[str]] = {}
     for label in sorted(set(labels)):
-        scores = np.asarray(matrix[labels == label].mean(axis=0)).ravel()
+        indices = np.where(labels == label)[0]
+        scores = np.asarray(matrix[indices].mean(axis=0)).ravel()
         output[str(int(label))] = names[scores.argsort()[::-1][:terms]].tolist()
     return output
 
@@ -149,7 +136,7 @@ def run_experiments(corpus_path: Path, output_dir: Path) -> dict:
     runs = [
         embed_local("minilm", texts),
         embed_local("mpnet", texts),
-        embed_openai_or_fallback(texts),
+        embed_local("bge_small", texts),
     ]
     summary = {}
     for run in runs:

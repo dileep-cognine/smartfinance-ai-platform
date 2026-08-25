@@ -55,7 +55,7 @@ def cached_tool(function: Callable[P, R]) -> Callable[P, R]:
         try:
             if client:
                 raw = client.get(cache_key)
-                if raw:
+                if raw is not None and isinstance(raw, (str, bytes, bytearray)):
                     result, cached = json.loads(raw), True
             elif cache_key in _memory_cache and _memory_cache[cache_key][0] > time.time():
                 result, cached = _memory_cache[cache_key][1], True

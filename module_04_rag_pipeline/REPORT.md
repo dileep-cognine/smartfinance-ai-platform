@@ -15,7 +15,7 @@ local development functional without provider keys.
 - Build and persist FAISS flat-L2 and ChromaDB stores over identical chunks.
 - Evaluate 20 queries, recording latency and manually judged top-5 hit rate.
 - Add LangChain MMR and compare redundancy.
-- Configure OpenAI or local Ollama generation with the same grounding contract.
+- Configure Groq or Hugging Face or local Ollama generation with the same grounding contract.
 - Run the 15-pair evaluation and three multi-turn transcripts. Report measured
   faithfulness, context relevance, and answer relevance.
 
