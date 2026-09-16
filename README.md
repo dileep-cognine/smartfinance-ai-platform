@@ -50,11 +50,98 @@ specific module directory as directed by its guide.
 
 - Docker Engine 24.0 or newer
 - Docker Compose V2.20 or newer
-- GNU Make 4.0 or newer
+- Optional: GNU Make 4.0 or newer for the Make targets
 - Git 2.40 or newer
 - Optional: NVIDIA Container Toolkit for GPU training modules
 
 On Windows, run the Make targets from Git Bash, WSL, or install GNU Make.
+
+## Docker quick start (PowerShell)
+
+Open Docker Desktop in Linux container mode and wait for it to start. Open a
+terminal in the repository root (the folder containing `docker-compose.yml`).
+These commands do not require Make or a local Python environment.
+
+### 1. Configure the environment
+
+Create `.env` only if it does not already exist:
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Review `.env` before starting. Keep the database password consistent with the
+Airflow database connection string, and configure the Airflow secret and admin
+password. Provider API keys can remain blank for supported local fallback paths.
+
+### 2. Build and start the platform
+
+```powershell
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
+```
+
+The first build downloads dependencies and can take several minutes. Wait for
+services to become healthy, then open the URLs in the architecture table above.
+Use `/docs` to try the backend APIs; there is no frontend application.
+Airflow uses the admin credentials in `.env`; Jupyter uses `JUPYTER_TOKEN`.
+
+### 3. Check health and logs
+
+```powershell
+Invoke-RestMethod -Uri 'http://localhost:8001/health'
+Invoke-RestMethod -Uri 'http://localhost:8002/health'
+docker compose logs --tail=100
+```
+
+To follow a specific service's logs (Ctrl+C exits log viewing):
+
+```powershell
+docker compose logs -f rag_api
+```
+
+### Run individual services
+
+For example, start only the embeddings service or the RAG service and its
+configured dependencies:
+
+```powershell
+docker compose up -d --build embeddings_service
+docker compose up -d --build rag_api
+```
+
+Other API service names are `agent_orchestrator`, `monitoring`, and
+`security_xai`. See the module guides for requests and required datasets.
+
+### Run training commands
+
+Training-profile services do not start with the default stack. Run them as
+one-off jobs. For example, prepare Module 1 data before tuning:
+
+```powershell
+docker compose --profile training build model_optimizer
+docker compose --profile training run --rm model_optimizer python -m src.main prepare-data
+docker compose --profile training run --rm model_optimizer python -m src.main tune --strategy bayesian --trials 100
+```
+
+### Stop and restart
+
+Stop containers while keeping them available to restart:
+
+```powershell
+docker compose stop
+docker compose start
+```
+
+Or remove containers and the project network while retaining named data volumes:
+
+```powershell
+docker compose down
+```
+
+Run `docker compose up -d` to start again after `down`. Avoid adding `--volumes`
+unless you intend to delete the stored service data.
 
 ## Installation
 
