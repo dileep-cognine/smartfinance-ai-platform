@@ -27,6 +27,25 @@ volumes. Application containers mount the repository data read-only.
 
 Ports are bound to `127.0.0.1`; they are not exposed on the LAN.
 
+## Module execution guides
+
+Each module has its own README with execution instructions. Run Docker Compose
+commands from the repository root; run `python -m src.main` commands from the
+specific module directory as directed by its guide.
+
+| Module | Guide |
+|---|---|
+| 1 - Credit-risk optimization | [README](module_01_model_optimization/README.md) |
+| 2 - Deep learning | [README](module_02_deep_learning/README.md) |
+| 3 - Pre-trained models | [README](module_03_pretrained_models/README.md) |
+| 4 - RAG pipeline | [README](module_04_rag_pipeline/README.md) |
+| 5 - Embeddings | [README](module_05_embeddings/README.md) |
+| 6 - Multi-agent research | [README](module_06_multi_agent/README.md) |
+| 7 - LangGraph and CrewAI | [README](module_07_langgraph_crewai/README.md) |
+| 8 - MLOps | [README](module_08_mlops/README.md) |
+| 9 - Security and ethics | [README](module_09_security_ethics/README.md) |
+| 10 - Explainability | [README](module_10_explainability/README.md) |
+
 ## Prerequisites
 
 - Docker Engine 24.0 or newer
