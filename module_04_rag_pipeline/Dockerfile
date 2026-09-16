@@ -1,6 +1,6 @@
 FROM python:3.11.9-slim-bookworm AS builder
 WORKDIR /build
-COPY requirements.txt .
+COPY module_04_rag_pipeline/requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 FROM python:3.11.9-slim-bookworm AS runtime

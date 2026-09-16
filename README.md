@@ -103,6 +103,17 @@ docker compose logs -f rag_api
 
 ### Run individual services
 
+The RAG image installs `module_04_rag_pipeline/requirements.txt`, isolating it
+from the shared CrewAI dependencies. After pulling an update, rebuild it with:
+
+```powershell
+docker compose build rag_api
+docker compose up -d rag_api
+```
+
+Other images still use the root requirements file; this change isolates the
+RAG build and does not establish that the complete stack builds successfully.
+
 For example, start only the embeddings service or the RAG service and its
 configured dependencies:
 

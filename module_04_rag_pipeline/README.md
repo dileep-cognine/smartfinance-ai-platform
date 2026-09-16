@@ -33,14 +33,15 @@ Compose also starts the configured MLflow dependency. Open
 ## Run locally with Python
 
 Use Python 3.11, matching the container runtime. From the repository root,
-create a virtual environment if needed and install the shared dependencies:
+create a virtual environment if needed and install the RAG dependencies:
 
 ```powershell
 python -m venv venv
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
+.\venv\Scripts\python.exe -m pip install -r module_04_rag_pipeline/requirements.txt
 ```
 
-The shared requirements include all modules and can take time to install.
+These dependencies include the RAG API, provider integrations, and retrieval
+benchmarks, without CrewAI or unrelated training and explainability packages.
 Docker is an alternative if native dependencies fail to install on Windows.
 Then start this module:
 
@@ -80,7 +81,7 @@ letters, digits, underscores, and hyphens (1–128 characters).
 From the repository root, using the built Docker image:
 
 ```powershell
-docker compose run --rm --no-deps rag_api python -m pytest tests -q
+docker compose -f docker-compose.yml -f docker/compose/docker-compose.test.yml run --build --rm --no-deps rag_api python -m pytest tests -q
 ```
 
 Or from this module directory with dependencies installed:
